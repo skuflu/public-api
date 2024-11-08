@@ -15,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-public class HoldingController {
+class HoldingController {
     final private HoldingRepository repository;
 
     @GetMapping(path = "/holdings", produces = "application/json")
@@ -37,4 +37,3 @@ class HoldingRepository {
         """).paramSource(parameters).query().listOfRows();
     }
 }
-

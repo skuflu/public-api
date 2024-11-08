@@ -10,6 +10,7 @@ AS
 		BatchExecutionResultsCustomer.StepDescription AS Description,
 		BatchExecutionResultsCustomer.FileName,
 		BatchExecutionResultsCustomer.FilePath,
-		COALESCE(BatchExecutionResultsCustomer.UpdateDate, BatchExecutionResultsCustomer.CreateDate) AS LastModifiedDate,
-		BatchExecutionResultsCustomer.VersionId AS Version
+		BatchExecutionResultsCustomer.CreateDate,
+		BatchExecutionResultsCustomer.UpdateDate,
+		BatchExecutionResultsCustomer.VersionId
 	FROM core.BatchExecutionResultsCustomer

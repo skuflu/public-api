@@ -2,6 +2,7 @@ package se.centevo.config;
 
 import java.io.IOException;
 
+import org.springframework.core.env.Environment;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -15,9 +16,13 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import lombok.RequiredArgsConstructor;
 
 @Component
-public class TenantIdentificationFilter extends OncePerRequestFilter {
+@RequiredArgsConstructor
+class TenantIdentificationFilter extends OncePerRequestFilter {
+	private final Environment env;
+
     @Override
     protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
         return request.getRequestURI().startsWith("/login");
@@ -31,7 +36,8 @@ public class TenantIdentificationFilter extends OncePerRequestFilter {
     		tenantId = tryGetTenantFromAuthentication();
     	}
     	TenantContext.setTenantId(tenantId);
-        
+        String tenantSystemUserCode = env.getProperty("tenants.datasources." + tenantId + ".cairo-system-user-code");
+		TenantContext.setTenantSystemUser(tenantSystemUserCode);
     	try {
     		filterChain.doFilter(request, response);
     	} finally {

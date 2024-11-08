@@ -8,10 +8,8 @@ import java.io.InputStream;
 import java.time.LocalDateTime;
 
 import org.apache.commons.io.IOUtils;
-import org.springframework.data.annotation.Id;
+import org.hibernate.annotations.Formula;
 import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.annotation.Version;
-import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import org.springframework.data.rest.webmvc.BasePathAwareController;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -24,14 +22,17 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mysema.commons.lang.URLEncoder;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Version;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 
 @BasePathAwareController
 @RequiredArgsConstructor
-public class ReportController {
+class ReportController {
     final private ReportRepository repository;
 
     @GetMapping(path = "/reports/{id}/download", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
@@ -72,10 +73,10 @@ public class ReportController {
 interface ReportRepository extends ReadRepository<Report, Long> {
 }
 
-@AllArgsConstructor
-@Data
+@Getter @Setter
+@Entity
 class Report {
-    @Id()
+    @Id
     Long reportId;
     String description;
     @JsonIgnore
@@ -83,6 +84,7 @@ class Report {
     @JsonIgnore
     String fileName;
 
+    @Formula("COALESCE(UpdateDate, CreateDate)")
     @LastModifiedDate LocalDateTime lastModifiedDate;
     @Version Long version;
 }

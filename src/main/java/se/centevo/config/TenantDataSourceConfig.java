@@ -12,12 +12,12 @@ import lombok.RequiredArgsConstructor;
 @Configuration
 @RequiredArgsConstructor
 @EnableConfigurationProperties(LiquibaseProperties.class)
-public class TenantDataSourceConfig {
+class TenantDataSourceConfig {
     private final TenantDataSourceProperties dataSourceProperties;
     private final LiquibaseProperties liquibaseProperties;
 
     @Bean
-    public DataSource getDataSource() {
+    DataSource getDataSource() {
         TenantAwareRoutingDataSource tenantAwareRoutingDataSource = new TenantAwareRoutingDataSource();
         tenantAwareRoutingDataSource.setTargetDataSources(dataSourceProperties.getDatasources());
         tenantAwareRoutingDataSource.afterPropertiesSet();
@@ -25,7 +25,7 @@ public class TenantDataSourceConfig {
     }
     
     @Bean
-    public DynamicDataSourceBasedMultiTenantSpringLiquibase tenantLiquibase() {
+    DynamicDataSourceBasedMultiTenantSpringLiquibase tenantLiquibase() {
         return new DynamicDataSourceBasedMultiTenantSpringLiquibase(dataSourceProperties, liquibaseProperties);
     }
 }

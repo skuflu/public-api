@@ -1,11 +1,10 @@
 --liquibase formatted sql
 
 --changeset seku:customer_trigger runOnChange:true
-CREATE OR ALTER TRIGGER PublicApi_Customer_Insert_Trigger
+CREATE OR ALTER TRIGGER PublicApi.PublicApi_Customer_Insert_Trigger
 ON PublicApi.Customer
-INSTEAD OF INSERT, UPDATE, DELETE AS
+INSTEAD OF INSERT AS
 BEGIN
-	EXEC SystemSecurity.spUtilSetUserSystemService 0;
 	DECLARE @CustomerId INT;
 
 	INSERT INTO Core.Customer (

@@ -37,8 +37,9 @@ AS
 		Contact.PhoneNumber,
 		Contact.Mobile,
 		Contact.Email,
-		COALESCE(Customer.UpdateDate, Customer.CreateDate) AS LastModifiedDate,
-		Customer.VersionId AS Version
+		Customer.CreateDate,
+		Customer.UpdateDate,
+		Customer.VersionId
 	FROM Core.Customer
 	INNER JOIN Core.CustomerType
 	ON CustomerType.CustomerTypeId = Customer.CustomerTypeId

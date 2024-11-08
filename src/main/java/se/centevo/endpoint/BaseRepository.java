@@ -9,38 +9,42 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
 import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.lang.NonNull;
 
-import com.infobip.spring.data.jdbc.QuerydslJdbcFragment;
-import com.infobip.spring.data.jdbc.QuerydslJdbcRepository;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.EntityPath;
+import com.querydsl.core.types.dsl.DatePath;
 import com.querydsl.core.types.dsl.DateTimePath;
 import com.querydsl.core.types.dsl.StringPath;
 
 @NoRepositoryBean
-public interface BaseRepository<T, ID> extends QuerydslBinderCustomizer<EntityPath<T>> {
+interface BaseRepository<T, ID> extends QuerydslBinderCustomizer<EntityPath<T>> {
+    
     @Override
-    default void customize(QuerydslBindings bindings, EntityPath<T> entityPathBase) {
+    default void customize(@NonNull QuerydslBindings bindings, @NonNull EntityPath<T> entityPathBase) {
+        bindings.bind(String.class).all((StringPath path, Collection<? extends String> values) -> {
+            final List<? extends String> pathValues = new ArrayList<>(values);
 
-        bindings.bind(String.class).first((StringPath path, String value) -> path.startsWith(value)
-                .or(path.like(value.replace("*", "%"))));
-
-        bindings.bind(String.class).all((StringPath path, Collection<? extends String> value) -> {
-            BooleanBuilder builder = new BooleanBuilder();
-            Iterator<? extends String> iterator = value.iterator();
-            while (iterator.hasNext()) {
-                builder.or(path.containsIgnoreCase(iterator.next()));
+            if(pathValues.size() == 1) {
+                return Optional.ofNullable(path.like(pathValues.get(0).replace("*", "%")));
+            } else {
+                BooleanBuilder builder = new BooleanBuilder();
+                Iterator<? extends String> iterator = values.iterator();
+                while (iterator.hasNext()) {
+                    builder.or(path.like(iterator.next().replace("*", "%")));
+                }
+                return Optional.of(builder);
             }
-            return Optional.of(builder);
         });
 
         bindings.bind(LocalDate.class)
-                .all((final DateTimePath<java.time.LocalDate> path, final Collection<? extends LocalDate> values) -> {
+                .all((final DatePath<java.time.LocalDate> path, final Collection<? extends LocalDate> values) -> {
                     final List<? extends LocalDate> dates = new ArrayList<>(values);
                     if (dates.size() == 1) {
                         return Optional.ofNullable(path.eq(dates.get(0)));
@@ -67,16 +71,16 @@ public interface BaseRepository<T, ID> extends QuerydslBinderCustomizer<EntityPa
 }
 
 @NoRepositoryBean
-interface EditableRepository<T, ID> extends BaseRepository<T, ID>, QuerydslJdbcRepository<T, ID> {
+interface EditableRepository<T, ID> extends BaseRepository<T, ID>, JpaRepository<T, ID> {
 
 }
 
 @NoRepositoryBean
 interface ReadRepository<T, ID> extends BaseRepository<T, ID>, PagingAndSortingRepository<T, ID>,
-        QuerydslPredicateExecutor<T>, QuerydslJdbcFragment<T> {
-    public Iterable<T> findAll();
+        QuerydslPredicateExecutor<T> {
+        public Iterable<T> findAll();
 
-    public Iterable<T> findAllById(Iterable<ID> ids);
-
-    public Optional<T> findById(ID id);
+        public Iterable<T> findAllById(Iterable<ID> ids);
+    
+        public Optional<T> findById(ID id);
 }

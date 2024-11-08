@@ -2,7 +2,7 @@ package se.centevo.config;
 
 import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
 
-public class TenantAwareRoutingDataSource extends AbstractRoutingDataSource {
+class TenantAwareRoutingDataSource extends AbstractRoutingDataSource {
 
     @Override
     protected Object determineCurrentLookupKey() {
@@ -11,7 +11,5 @@ public class TenantAwareRoutingDataSource extends AbstractRoutingDataSource {
     		return tenantId;
     	else
     		return "default";
-    }
-    
-    
+    } 
 }
